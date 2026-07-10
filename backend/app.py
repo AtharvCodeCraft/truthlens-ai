@@ -1,12 +1,17 @@
-# app.py
+from fastapi import FastAPI
+from api.routes import router
+from config import APP_NAME, APP_VERSION
 
-from flask import Flask, jsonify
+app = FastAPI(
+    title=APP_NAME,
+    version=APP_VERSION
+)
 
-app = Flask(__name__)
+app.include_router(router)
 
-@app.route("/")
-def index():
-    return jsonify({"message": "TruthLens AI backend is running."})
 
-if __name__ == "__main__":
-    app.run(debug=True)
+@app.get("/")
+def root():
+    return {
+        "message": "Welcome to TruthLens AI"
+    }
