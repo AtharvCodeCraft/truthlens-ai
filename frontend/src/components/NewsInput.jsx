@@ -1,11 +1,12 @@
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 function NewsInput({ onAnalyze, loading }) {
   const [text, setText] = useState("");
 
   const handleSubmit = () => {
     if (!text.trim()) {
-      alert("Please enter a news article.");
+      toast.error("Please enter a news article.");
       return;
     }
 

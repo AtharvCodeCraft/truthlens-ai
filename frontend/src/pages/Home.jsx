@@ -6,6 +6,7 @@ import Features from "../components/Features";
 import NewsInput from "../components/NewsInput";
 import ResultCard from "../components/ResultCard";
 import Loader from "../components/Loader";
+import toast from "react-hot-toast";
 
 import api from "../services/api";
 
@@ -18,7 +19,7 @@ function Home() {
   const analyzeNews = async (text) => {
     setNewsText(text);
     setLoading(true);
-
+    
     try {
 
       const response = await api.post("/analyze", {
@@ -26,12 +27,14 @@ function Home() {
       });
 
       setResult(response.data);
+      toast.success("Analysis completed successfully!");
+      
 
     } catch (err) {
 
       console.error(err);
 
-      alert("Backend connection failed.");
+      toast.error("Backend connection failed!");
 
     }
 
@@ -52,8 +55,13 @@ function Home() {
         loading={loading}
       />
 
-      {loading ? <Loader /> : <ResultCard result={result} />}
+      
 
+{loading && <Loader />}
+
+{result && !loading && (
+  <ResultCard result={result} />
+)}
      
 
       
