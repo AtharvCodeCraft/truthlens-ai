@@ -1,45 +1,41 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import toast from "react-hot-toast";
+import { useAuth } from "../context/AuthContext";
 
 function Login() {
+  const navigate = useNavigate();
+  const { login } = useAuth();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-const handleLogin = async (e) => {
-  e.preventDefault();
+  const handleLogin = async (e) => {
+    e.preventDefault();
 
-  try {
-    const response = await api.post("/auth/login", {
-      email,
-      password,
-    });
+    try {
+      const response = await api.post("/auth/login", {
+        email,
+        password,
+      });
 
-    // Save JWT Token
-    localStorage.setItem(
-      "token",
-      response.data.access_token
-    );
+      // Save JWT Token
+     login(
+  response.data.user,
+  response.data.access_token
+);
 
-    // Save User Details
-    localStorage.setItem(
-      "user",
-      JSON.stringify(response.data.user)
-    );
+      toast.success("Login successful!");
 
-    toast.success("Login successful!");
+      navigate("/", { replace: true });
 
-     setTimeout(() => {
-      window.location.href = "/";
-    }, 1000);
-
-    // Redirect to Home
-    window.location.href = "/";
-
-  } catch (error) {
-    alert(error.response?.data?.detail || "Login failed");
-  }
-};
+    } catch (error) {
+      toast.error(
+        error.response?.data?.detail || "Login failed"
+      );
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-950">
@@ -70,11 +66,11 @@ const handleLogin = async (e) => {
         />
 
         <button
+          type="submit"
           className="w-full bg-cyan-500 hover:bg-cyan-600 text-black py-3 rounded-lg font-bold"
         >
           Login
         </button>
-        
 
       </form>
 

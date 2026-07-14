@@ -1,12 +1,18 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FaShieldHalved } from "react-icons/fa6";
+import toast from "react-hot-toast";
+import { useAuth } from "../context/AuthContext";
 
 function Navbar() {
-  const user = JSON.parse(localStorage.getItem("user"));
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
 
   const handleLogout = () => {
-    localStorage.removeItem("user");
-    window.location.href = "/";
+    logout();
+
+    toast.success("Logged out successfully");
+
+    navigate("/", { replace: true });
   };
 
   return (
@@ -22,6 +28,7 @@ function Navbar() {
       </Link>
 
       {/* Navigation */}
+
       <ul className="hidden md:flex gap-8 items-center text-gray-300">
 
         <li>
@@ -33,14 +40,16 @@ function Navbar() {
           </Link>
         </li>
 
-        <li>
-          <Link
-            to="/history"
-            className="hover:text-cyan-400 transition"
-          >
-            History
-          </Link>
-        </li>
+        {user && (
+          <li>
+            <Link
+              to="/history"
+              className="hover:text-cyan-400 transition"
+            >
+              History
+            </Link>
+          </li>
+        )}
 
         <li>
           <Link

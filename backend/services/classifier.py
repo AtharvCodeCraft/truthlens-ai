@@ -1,20 +1,36 @@
 from transformers import pipeline
 
-classifier = pipeline(
-    "text-classification",
-    model="distilbert-base-uncased-finetuned-sst-2-english"
-)
+classifier = None
+
+def get_classifier():
+    global classifier
+
+    if classifier is None:
+        print("Loading DistilBERT...")
+        classifier = pipeline(
+            "text-classification",
+            model="distilbert-base-uncased-finetuned-sst-2-english"
+        )
+        print("DistilBERT Loaded!")
+
+    return classifier
+
 
 def predict_news(text: str):
+    model = get_classifier()
 
-    result = classifier(text[:512])[0]
+    result = model(text[:512])[0]
 
     label = result["label"]
     score = result["score"]
 
-    prediction = "Likely Real" if label == "POSITIVE" else "Likely Fake"
+    prediction = (
+        "Likely Real"
+        if label == "POSITIVE"
+        else "Likely Fake"
+    )
 
     return {
         "prediction": prediction,
-        "confidence": round(score * 100, 2)
+        "confidence": round(score * 100, 2),
     }

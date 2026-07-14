@@ -65,7 +65,7 @@ function Loader({ onComplete }) {
             animate={{ rotate: 360 }}
             transition={{
               repeat: Infinity,
-              duration: 3,
+              duration: 8,
               ease: "linear"
             }}
             className="text-6xl"
@@ -87,7 +87,7 @@ function Loader({ onComplete }) {
 
             <motion.div
               animate={{ width: `${progress}%` }}
-              transition={{ duration: 1.5 }}
+              transition={{ duration: 4.0 }}
               className="bg-cyan-400 h-full rounded-full"
             />
 
