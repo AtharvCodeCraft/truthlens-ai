@@ -1,34 +1,13 @@
-import requests
-
-OLLAMA_URL = "http://localhost:11434/api/generate"
-MODEL = "llama3.2"
-
-
 def generate_explanation(article, prediction):
-    prompt = f"""
-You are an AI Fake News Detector.
 
-Prediction:
-{prediction}
+    if prediction == "Likely Real":
+        return (
+            "The language appears neutral and factual. "
+            "No obvious sensational or misleading phrases were detected. "
+            "However, this is an AI prediction and should be verified with trusted news sources."
+        )
 
-Article:
-{article}
-
-Explain in simple English why this news might be real or fake.
-
-Keep your answer under 5 lines.
-"""
-
-    response = requests.post(
-        OLLAMA_URL,
-        json={
-            "model": MODEL,
-            "prompt": prompt,
-            "stream": False
-        }
+    return (
+        "The language contains characteristics that may indicate misinformation "
+        "or sensational reporting. This prediction should be verified with reliable sources."
     )
-
-    if response.status_code == 200:
-        return response.json()["response"]
-
-    return "Unable to generate explanation."
