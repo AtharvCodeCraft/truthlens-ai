@@ -1,6 +1,4 @@
-import requests
-
-OLLAMA_URL = "http://localhost:11434/api/generate"
+from services.gemini_service import generate_text
 
 
 def fact_check(claims):
@@ -16,23 +14,14 @@ Analyze this claim:
 
 {claim}
 
-Return ONLY this format:
+Return ONLY in this format:
 
 Status: Verified / Unverified / Misleading
 
 Reason: One or two sentences.
 """
 
-        response = requests.post(
-            OLLAMA_URL,
-            json={
-                "model": "llama3.2",
-                "prompt": prompt,
-                "stream": False
-            }
-        )
-
-        answer = response.json()["response"]
+        answer = generate_text(prompt)
 
         results.append({
             "claim": claim,
