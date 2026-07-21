@@ -1,13 +1,20 @@
+from services.gemini_service import generate_text
+
+
 def generate_explanation(article, prediction):
 
-    if prediction == "Likely Real":
-        return (
-            "The language appears neutral and factual. "
-            "No obvious sensational or misleading phrases were detected. "
-            "However, this is an AI prediction and should be verified with trusted news sources."
-        )
+    prompt = f"""
+You are an AI Fake News Detector.
 
-    return (
-        "The language contains characteristics that may indicate misinformation "
-        "or sensational reporting. This prediction should be verified with reliable sources."
-    )
+Prediction:
+{prediction}
+
+Article:
+{article}
+
+Explain in simple English why this news might be real or fake.
+
+Keep the explanation under 5 lines.
+"""
+
+    return generate_text(prompt)
