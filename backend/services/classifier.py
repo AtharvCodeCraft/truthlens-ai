@@ -1,36 +1,98 @@
-from transformers import pipeline
 
-classifier = None
+import json
+import re
 
-def get_classifier():
-    global classifier
-
-    if classifier is None:
-        print("Loading DistilBERT...")
-        classifier = pipeline(
-            "text-classification",
-            model="distilbert-base-uncased-finetuned-sst-2-english"
-        )
-        print("DistilBERT Loaded!")
-
-    return classifier
+from services.gemini_service import generate_text
 
 
 def predict_news(text: str):
-    model = get_classifier()
+    """
+    Analyze news text using Gemini instead of loading
+    a local Hugging Face Transformer model.
 
-    result = model(text[:512])[0]
+    Returns the same basic structure that the existing
+    application expects.
+    """
 
-    label = result["label"]
-    score = result["score"]
+    if not text or not text.strip():
+        raise ValueError("News text cannot be empty.")
 
-    prediction = (
-        "Likely Real"
-        if label == "POSITIVE"
-        else "Likely Fake"
-    )
+    # Limit input size to avoid unnecessarily large API requests
+    news_text = text.strip()[:6000]
 
-    return {
-        "prediction": prediction,
-        "confidence": round(score * 100, 2),
-    }
+    prompt = f"""
+You are a professional fake-news analysis AI.
+
+Analyze the following news text and determine whether it is
+likely REAL or FAKE based only on the information provided.
+
+Important:
+- Do not use sentiment as a proxy for truth.
+- Do not claim that you verified external sources unless you actually did.
+- Give a confidence score between 0 and 100.
+- Return ONLY valid JSON.
+- Do not use markdown code blocks.
+
+Required JSON format:
+{{
+    "prediction": "Likely Real",
+    "confidence": 85
+}}
+
+News text:
+{news_text}
+"""
+
+    try:
+        response = generate_text(prompt)
+
+        # Remove possible markdown formatting
+        cleaned_response = response.strip()
+
+        cleaned_response = re.sub(
+            r"^```json\s*",
+            "",
+            cleaned_response,
+            flags=re.IGNORECASE
+        )
+
+        cleaned_response = re.sub(
+            r"\s*```$",
+            "",
+            cleaned_response
+        )
+
+        result = json.loads(cleaned_response)
+
+        prediction = result.get("prediction")
+        confidence = result.get("confidence")
+
+        # Validate prediction
+        if prediction not in ["Likely Real", "Likely Fake"]:
+            raise ValueError("Invalid prediction returned by Gemini.")
+
+        # Validate confidence
+        confidence = float(confidence)
+
+        if not 0 <= confidence <= 100:
+            raise ValueError("Invalid confidence score returned by Gemini.")
+
+        return {
+            "prediction": prediction,
+            "confidence": round(confidence, 2)
+        }
+
+    except json.JSONDecodeError:
+        raise RuntimeError(
+            "Gemini returned an invalid analysis format."
+        )
+
+    except (ValueError, TypeError) as e:
+        raise RuntimeError(
+            f"Invalid Gemini analysis result: {e}"
+        )
+
+    except Exception as e:
+        raise RuntimeError(
+            f"News classification failed: {e}"
+        )

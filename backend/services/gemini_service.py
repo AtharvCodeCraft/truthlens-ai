@@ -1,23 +1,66 @@
+
 import os
-import google.generativeai as genai
+
 from dotenv import load_dotenv
+from google import genai
+
+
+# --------------------------------------------------
+# Load Environment Variables
+# --------------------------------------------------
 
 load_dotenv()
 
-print("Current Working Directory:", os.getcwd())
-print("GEMINI_API_KEY exists:", "GEMINI_API_KEY" in os.environ)
-print("GEMINI_API_KEY value:", os.getenv("GEMINI_API_KEY"))
+
+# --------------------------------------------------
+# Gemini API Configuration
+# --------------------------------------------------
 
 api_key = os.getenv("GEMINI_API_KEY")
 
 if not api_key:
-    raise ValueError("GEMINI_API_KEY not found in environment variables.")
+    raise RuntimeError(
+        "GEMINI_API_KEY environment variable is not configured."
+    )
 
-genai.configure(api_key=api_key)
 
-model = genai.GenerativeModel("gemini-2.5-flash")
+# Create Gemini client
+client = genai.Client(
+    api_key=api_key
+)
 
+
+# --------------------------------------------------
+# Generate Text
+# --------------------------------------------------
 
 def generate_text(prompt: str) -> str:
-    response = model.generate_content(prompt)
-    return response.text.strip()
+    """
+    Generate text using Google Gemini.
+
+    Args:
+        prompt: Prompt to send to Gemini.
+
+    Returns:
+        Generated text.
+    """
+
+    try:
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt
+        )
+
+        if not response or not response.text:
+            raise RuntimeError(
+                "Gemini returned an empty response."
+            )
+
+        return response.text.strip()
+
+    except Exception as e:
+        print(f"Gemini API error: {type(e).__name__}: {e}")
+
+        raise RuntimeError(
+            "Unable to generate AI response."
+        )

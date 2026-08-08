@@ -7,21 +7,44 @@ from database import Base
 class Analysis(Base):
     __tablename__ = "analysis"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(
+        Integer,
+        primary_key=True,
+        index=True
+    )
 
     user_id = Column(
         Integer,
-        ForeignKey("users.id")
+        ForeignKey("users.id"),
+        nullable=False,
+        index=True
     )
 
-    news = Column(Text)
+    news = Column(
+        Text,
+        nullable=False
+    )
 
-    prediction = Column(Text)
+    prediction = Column(
+        Text,
+        nullable=False
+    )
 
-    confidence = Column(Float)
+    confidence = Column(
+        Float,
+        nullable=False
+    )
 
-    explanation = Column(Text)
+    explanation = Column(
+        Text,
+        nullable=False
+    )
 
-    created_at = Column(Text)
+    created_at = Column(
+        Text,
+        nullable=False
+    )
 
-    user = relationship("User")
+    user = relationship(
+        "User"
+    )

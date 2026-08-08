@@ -1,87 +1,121 @@
+
 from datetime import datetime
 
 from database import SessionLocal
 from models.analysis import Analysis
 
 
-def save_analysis(user_id, text, result):
+# --------------------------------------------------
+# Save Analysis
+# --------------------------------------------------
 
-    print("=" * 50)
-    print("Saving Analysis")
-    print("User ID:", user_id)
-    print("News:", text[:50])
-    print("=" * 50)
+def save_analysis(user_id, text, result):
+    """
+    Save a news analysis for the authenticated user.
+    """
 
     db = SessionLocal()
 
-    analysis = Analysis(
-        user_id=user_id,
-        news=text,
-        prediction=result["prediction"],
-        confidence=result["confidence"],
-        explanation=result["explanation"],
-        created_at=datetime.now().strftime("%d-%m-%Y %H:%M")
-    )
+    try:
+        analysis = Analysis(
+            user_id=user_id,
+            news=text,
+            prediction=result["prediction"],
+            confidence=result["confidence"],
+            explanation=result["explanation"],
+            created_at=datetime.now().strftime(
+                "%d-%m-%Y %H:%M"
+            )
+        )
 
-    db.add(analysis)
-    db.commit()
+        db.add(analysis)
+        db.commit()
+        db.refresh(analysis)
 
-    print("Analysis Saved Successfully!")
+        return analysis
 
-    db.close()
+    except Exception:
+        db.rollback()
+        raise
 
+    finally:
+        db.close()
+
+
+# --------------------------------------------------
+# Get User Analysis History
+# --------------------------------------------------
 
 def get_user_analysis_history(user_id):
+    """
+    Return analysis history belonging only to the specified user.
+    """
 
     db = SessionLocal()
 
-    analyses = (
-        db.query(Analysis)
-        .filter(Analysis.user_id == user_id)
-        .order_by(Analysis.id.desc())
-        .all()
-    )
-
-    print("History requested for user:", user_id)
-    print("Records found:", len(analyses))
-
-    history = []
-
-    for item in analyses:
-        history.append({
-            "id": item.id,
-            "news": item.news,
-            "prediction": item.prediction,
-            "confidence": item.confidence,
-            "explanation": item.explanation,
-            "created_at": item.created_at
-        })
-
-    db.close()
-
-    return history
-
-
-# 👇 ADD THIS FUNCTION AT THE END
-def delete_analysis(user_id, analysis_id):
-
-    db = SessionLocal()
-
-    analysis = (
-        db.query(Analysis)
-        .filter(
-            Analysis.id == analysis_id,
-            Analysis.user_id == user_id
+    try:
+        analyses = (
+            db.query(Analysis)
+            .filter(
+                Analysis.user_id == user_id
+            )
+            .order_by(
+                Analysis.id.desc()
+            )
+            .all()
         )
-        .first()
-    )
 
-    if not analysis:
+        history = []
+
+        for item in analyses:
+            history.append({
+                "id": item.id,
+                "news": item.news,
+                "prediction": item.prediction,
+                "confidence": item.confidence,
+                "explanation": item.explanation,
+                "created_at": item.created_at
+            })
+
+        return history
+
+    finally:
         db.close()
-        return False
 
-    db.delete(analysis)
-    db.commit()
-    db.close()
 
-    return True
+# --------------------------------------------------
+# Delete Analysis
+# --------------------------------------------------
+
+def delete_analysis(user_id, analysis_id):
+    """
+    Delete an analysis only if it belongs to the
+    authenticated user.
+    """
+
+    db = SessionLocal()
+
+    try:
+        analysis = (
+            db.query(Analysis)
+            .filter(
+                Analysis.id == analysis_id,
+                Analysis.user_id == user_id
+            )
+            .first()
+        )
+
+        if not analysis:
+            return False
+
+        db.delete(analysis)
+        db.commit()
+
+        return True
+
+    except Exception:
+        db.rollback()
+        raise
+
+    finally:
+        db.close()

@@ -3,7 +3,7 @@ import toast from "react-hot-toast";
 
 
 const api = axios.create({
-  baseURL: "https://truthlens-ai-production-34f0.up.railway.app",
+  baseURL: "https://truthlens-ai-nqcq.onrender.com",
 });
 
 // Request Interceptor
