@@ -9,9 +9,9 @@ import Loader from "../components/Loader";
 import toast from "react-hot-toast";
 
 import api from "../services/api";
+import AnimatedBackground from "../components/AnimatedBackground";
 
 function Home() {
-
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [newsText, setNewsText] = useState("");
@@ -19,52 +19,58 @@ function Home() {
   const analyzeNews = async (text) => {
     setNewsText(text);
     setLoading(true);
-    
-    try {
 
+    try {
       const response = await api.post("/analyze", {
         text,
       });
 
       setResult(response.data);
-      toast.success("Analysis completed successfully!");
-      
 
+      toast.success(
+        "Analysis completed successfully!"
+      );
     } catch (err) {
-
       console.error(err);
 
-      toast.error("Backend connection failed!");
-
+      toast.error(
+        "Backend connection failed!"
+      );
     }
 
     setLoading(false);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950">
+    <div className="relative min-h-screen bg-slate-950 overflow-hidden">
 
-      <Navbar />
+      {/* Animated AI Background */}
+      <AnimatedBackground />
 
-      <Hero />
+      {/* Main Content */}
+      <div className="relative z-10">
 
-      <Features />
+        <Navbar />
 
-      <NewsInput
-        onAnalyze={analyzeNews}
-        loading={loading}
-      />
+        <Hero />
 
-      
+        <Features />
 
-{loading && <Loader />}
+        <NewsInput
+          onAnalyze={analyzeNews}
+          loading={loading}
+        />
 
-{result && !loading && (
-  <ResultCard result={result} />
-)}
-     
+        {loading && <Loader />}
 
-      
+        {result && !loading && (
+          <ResultCard
+            result={result}
+            newsText={newsText}
+          />
+        )}
+
+      </div>
 
     </div>
   );
