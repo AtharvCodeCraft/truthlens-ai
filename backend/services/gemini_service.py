@@ -1,20 +1,9 @@
-
 import os
 
 from dotenv import load_dotenv
 from google import genai
 
-
-# --------------------------------------------------
-# Load Environment Variables
-# --------------------------------------------------
-
 load_dotenv()
-
-
-# --------------------------------------------------
-# Gemini API Configuration
-# --------------------------------------------------
 
 api_key = os.getenv("GEMINI_API_KEY")
 
@@ -23,31 +12,22 @@ if not api_key:
         "GEMINI_API_KEY environment variable is not configured."
     )
 
+client = genai.Client(api_key=api_key)
 
-# Create Gemini client
-client = genai.Client(
-    api_key=api_key
+GEMINI_MODEL = os.getenv(
+    "GEMINI_MODEL",
+    "gemini-3.5-flash"
 )
 
-
-# --------------------------------------------------
-# Generate Text
-# --------------------------------------------------
 
 def generate_text(prompt: str) -> str:
     """
     Generate text using Google Gemini.
-
-    Args:
-        prompt: Prompt to send to Gemini.
-
-    Returns:
-        Generated text.
     """
 
     try:
         response = client.models.generate_content(
-            model="gemini-2.5-flash",
+            model=GEMINI_MODEL,
             contents=prompt
         )
 
