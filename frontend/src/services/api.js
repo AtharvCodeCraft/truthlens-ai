@@ -1,12 +1,10 @@
 import axios from "axios";
 import toast from "react-hot-toast";
 
-
 const api = axios.create({
-  baseURL: "https://truthlens-ai-nqcq.onrender.com",
+  baseURL: import.meta.env.VITE_API_URL,
 });
 
-// Request Interceptor
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
 
@@ -17,10 +15,8 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Response Interceptor
 api.interceptors.response.use(
   (response) => response,
-
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem("token");
@@ -28,7 +24,6 @@ api.interceptors.response.use(
 
       toast.error("Session expired. Please login again.");
 
-      // Prevent redirect loop if already on login page
       if (window.location.pathname !== "/login") {
         window.location.href = "/login";
       }

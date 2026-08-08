@@ -33,24 +33,25 @@ app = FastAPI(
 # CORS Configuration
 # --------------------------------------------------
 
-# Get frontend URL from environment variable.
-# Example on Render:
-# FRONTEND_URL=https://your-frontend.onrender.com
-
+# Frontend URL from Render environment variable
 frontend_url = os.getenv(
     "FRONTEND_URL",
-    "http://localhost:5173"
+    "https://truthlens-ai-nine-gold.vercel.app"
 )
 
 allowed_origins = [
+    # Production frontend
+    "https://truthlens-ai-nine-gold.vercel.app",
+
+    # Environment variable
     frontend_url,
+
+    # Local development
     "http://localhost:5173",
 ]
 
-
 # Remove duplicate origins
 allowed_origins = list(set(allowed_origins))
-
 
 app.add_middleware(
     CORSMiddleware,
